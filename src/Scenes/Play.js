@@ -17,6 +17,8 @@ class Play extends Phaser.Scene {
         this.onLilyPad = false
         this.lilyCounter = 0
         this.currentLilyPad
+        this.newLily = 0
+        this.followLilyPad = false
 
         //enemy
         this.enemySpeed = -100
@@ -143,6 +145,8 @@ class Play extends Phaser.Scene {
         if(Phaser.Input.Keyboard.JustDown(cursors.down)) {
             if(this.frog.y < 525 && this.canHop) {
                 //hop to test
+                this.followLilyPad = false
+
                 this.canHop = false
                 this.hopPoint.x = this.frog.x
                 this.hopPoint.y = this.frog.y + 150
@@ -158,6 +162,8 @@ class Play extends Phaser.Scene {
         else if(Phaser.Input.Keyboard.JustDown(cursors.up)) {
             if(this.frog.y > 75 && this.canHop) {
                 //hop to test
+                this.followLilyPad = false
+
                 this.frog.setVelocityX(0)
                 this.canHop = false
                 this.hopPoint.x = this.frog.x
@@ -213,7 +219,14 @@ class Play extends Phaser.Scene {
         {
             this.frog.body.reset(this.hopPoint.x, this.hopPoint.y)
             this.canHop = true
-            //console.log('on hop point')
+            if(!this.onLilyPad){
+                console.log('jumped off')
+                this.frog.destroy()
+            }
+            else {
+                console.log('jumped on')
+                this.followLilyPad = true
+            }
         }
 
         /*
@@ -232,9 +245,11 @@ class Play extends Phaser.Scene {
         this.physics.world.collide(this.frogProjectileGroup, this.projectileGroup, this.frogProjectileEnemyCollision, null, this) //frog projectile vs projectile
         
         // if not already on lily pad and isn't hopping off lily pad
-        if(!this.onLilyPad && this.canHop){
+        this.physics.world.collide(this.frog, this.lilyPadGroup, this.frogLilyPadCollision, null, this) // frog vs lily pad
+        /*
+        if(!this.onLilyPad && this.canHop) {
             this.physics.world.collide(this.frog, this.lilyPadGroup, this.frogLilyPadCollision, null, this) // frog vs lily pad
-        }
+        }*/
         
     }
 
@@ -291,7 +306,7 @@ class Play extends Phaser.Scene {
         }
 
         this.lilyPad = new LilyPad(this, this.lilyDir, this.lilyPadPos.x, this.lilyPadPos.y).setScale(0.5)
-        this.lilyPad.body.setSize(90, 90)
+        this.lilyPad.body.setSize(100, 100)
 
         this.lilyPadGroup.add(this.lilyPad)
 
@@ -300,31 +315,37 @@ class Play extends Phaser.Scene {
     }
 
     frogLilyPadCollision(frog, lilyPad) {
-        if(this.frog.y == 75 || this.frog.y == 225 || this.frog.y == 375 || this.frog.y == 525 ){
-            this.onLilyPad = true
-            this.currentLilyPad = lilyPad
-            //console.log('lily pad!')
-            this.frog.setVelocityY(0)
 
-            if(lilyPad.body.velocity.x > 0){
-                if(lilyPad.y == 225) {
-                    this.frog.setVelocityX(-this.lilyPadSpeed)
+        if(this.followLilyPad) {
+            if(this.frog.y == 75 || this.frog.y == 225 || this.frog.y == 375 || this.frog.y == 525 ){
+                this.onLilyPad = true
+                this.currentLilyPad = lilyPad
+                this.newLily = lilyPad 
+                this.frog.setVelocityY(0)
+    
+                if(lilyPad.body.velocity.x > 0){
+                    if(lilyPad.y == 225) {
+                        this.frog.setVelocityX(-this.lilyPadSpeed)
+                    }
+                    else {
+                        this.frog.setVelocityX(-this.lilyPadSpeed)
+                    }
+                    
                 }
-                else {
-                    this.frog.setVelocityX(-this.lilyPadSpeed)
+                else{
+                    if(lilyPad.y == 375) {
+                        this.frog.setVelocityX(this.lilyPadSpeed)
+                    }
+                    else {
+                        this.frog.setVelocityX(this.lilyPadSpeed)
+                    }
                 }
-                
             }
-            else{
-                if(lilyPad.y == 375) {
-                    this.frog.setVelocityX(this.lilyPadSpeed)
-                }
-                else {
-                    this.frog.setVelocityX(this.lilyPadSpeed)
-                }
-            }
-            
         }
+        else if (this.newLily != lilyPad){
+            this.onLilyPad = true
+        }
+
     }
 
     addEnemy() {
