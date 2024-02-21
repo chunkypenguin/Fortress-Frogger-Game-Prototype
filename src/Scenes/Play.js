@@ -158,6 +158,7 @@ class Play extends Phaser.Scene {
         else if(Phaser.Input.Keyboard.JustDown(cursors.up)) {
             if(this.frog.y > 75 && this.canHop) {
                 //hop to test
+                this.frog.setVelocityX(0)
                 this.canHop = false
                 this.hopPoint.x = this.frog.x
                 this.hopPoint.y = this.frog.y - 150
@@ -286,11 +287,11 @@ class Play extends Phaser.Scene {
         else if(this.lilyCounter < 16){
             this.lilyPadPos.x = -100
             this.lilyPadPos.y = 525
-            this.lilyDir = -this.lilyPadSpeed
+            this.lilyDir = -this.lilyPadSpeed 
         }
 
         this.lilyPad = new LilyPad(this, this.lilyDir, this.lilyPadPos.x, this.lilyPadPos.y).setScale(0.5)
-        this.lilyPad.body.setSize(80, 80)
+        this.lilyPad.body.setSize(90, 90)
 
         this.lilyPadGroup.add(this.lilyPad)
 
@@ -306,10 +307,21 @@ class Play extends Phaser.Scene {
             this.frog.setVelocityY(0)
 
             if(lilyPad.body.velocity.x > 0){
-                this.frog.setVelocityX(-this.lilyPadSpeed)
+                if(lilyPad.y == 225) {
+                    this.frog.setVelocityX(-this.lilyPadSpeed)
+                }
+                else {
+                    this.frog.setVelocityX(-this.lilyPadSpeed)
+                }
+                
             }
             else{
-                this.frog.setVelocityX(this.lilyPadSpeed)
+                if(lilyPad.y == 375) {
+                    this.frog.setVelocityX(this.lilyPadSpeed)
+                }
+                else {
+                    this.frog.setVelocityX(this.lilyPadSpeed)
+                }
             }
             
         }
